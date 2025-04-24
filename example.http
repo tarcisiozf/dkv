@@ -1,0 +1,19 @@
+@url=localhost:9000
+@key=example-key
+@value=example-value
+
+### Set key-value
+POST http://{{url}}/{{key}}
+
+{
+  "value": "{{value}}"
+}
+
+### Get key-value
+GET http://{{url}}/{{key}}
+
+### Delete key-value
+DELETE http://{{url}}/{{key}}
+
+### Get info
+GET http://{{url}}/info
