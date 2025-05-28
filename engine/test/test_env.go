@@ -275,8 +275,7 @@ func (te *Environment) FindWriterForSlot(slot uint16) *engine.DbEngine {
 	return writer
 }
 
-func (te *Environment) PopulateWriters(n int) ([]db.Entry, error) {
-	concurrency := 100
+func (te *Environment) PopulateWriters(n, concurrency int) ([]db.Entry, error) {
 	if n < concurrency {
 		concurrency = n
 	}
@@ -284,7 +283,7 @@ func (te *Environment) PopulateWriters(n int) ([]db.Entry, error) {
 	el := faults.ErrList{}
 	var wg sync.WaitGroup
 	wg.Add(concurrency)
-	ch := make(chan db.Entry, concurrency)
+	ch := make(chan db.Entry, n)
 
 	for i := 0; i < concurrency; i++ {
 		go func() {
@@ -304,7 +303,7 @@ func (te *Environment) PopulateWriters(n int) ([]db.Entry, error) {
 		}()
 	}
 
-	entries := make([]db.Entry, 0)
+	entries := make([]db.Entry, n)
 	for i := 0; i < n; i++ {
 		key := te.FakeKey()
 		entry := db.Entry{
@@ -312,7 +311,7 @@ func (te *Environment) PopulateWriters(n int) ([]db.Entry, error) {
 			Value:  te.FakeValue(),
 			SlotId: slots.GetSlotId(key),
 		}
-		entries = append(entries, entry)
+		entries[i] = entry
 		ch <- entry
 	}
 	close(ch)

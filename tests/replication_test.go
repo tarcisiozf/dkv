@@ -53,7 +53,7 @@ func TestDbEngine_Replication(t *testing.T) {
 	t.Run("write and read from replicas", func(t *testing.T) {
 		time.Sleep(5 * time.Second)
 
-		entries, err := testEnv.PopulateWriters(10)
+		entries, err := testEnv.PopulateWriters(10, 1)
 		if err != nil {
 			t.Fatalf("Error populating writers: %v", err)
 		}

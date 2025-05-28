@@ -50,7 +50,7 @@ func TestDbEngine_Cluster_NewWriterWithReplicas(t *testing.T) {
 
 	t.Run("populate cluster", func(t *testing.T) {
 		var err error
-		entries, err = testEnv.PopulateWriters(numEntries)
+		entries, err = testEnv.PopulateWriters(numEntries, 10)
 		if err != nil {
 			t.Fatalf("[FATAL] Error populating writers: %v", err)
 		}
