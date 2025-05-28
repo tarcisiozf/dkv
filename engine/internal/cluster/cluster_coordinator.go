@@ -19,6 +19,8 @@ import (
 	"time"
 )
 
+var waitForAllNodes = 3 * time.Second
+
 type UpdateParamsRequest struct {
 	Status       status.Status
 	Role         role.Role
@@ -60,7 +62,7 @@ func NewCoordinator(
 func (c *Coordinator) RebalanceCluster() error {
 	_, err := c.nodeRegistry.WithCoordinatorLock(c.node.ID, func() error {
 		// wait for all nodes to register
-		time.Sleep(10 * time.Second)
+		time.Sleep(waitForAllNodes)
 
 		distributionStrategy := selectDistributionStrategy(c.config, c.nodes)
 		if distributionStrategy == nil {
