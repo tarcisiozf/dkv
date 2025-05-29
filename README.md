@@ -11,6 +11,32 @@ The project is designed for experimentation around consensus‑less replication,
 
 > **Not production ready.**  The codebase is a research project. Use at your own risk.
 
+## Quickstart (Simulate cluster & test via CLI)
+
+**1. Prerequisites**
+* Go >= 1.22
+* ZooKeeper running — easiest is Docker:
+    ```bash
+    docker-compose up -d
+    ```
+
+**2. Start simulated cluster**
+
+This will start one writer instance, and one read‑replica, all running in the same process.
+```bash
+go run examples/cluster/main.go
+```
+
+**3. Build the CLI**
+```bash
+make build-cli
+```
+
+**4. Run CLI**
+```bash
+./bin/cli localhost:17000
+```
+
 ## Design & Trade‑offs
 
 ### 1. Partitioning
