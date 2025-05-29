@@ -59,6 +59,7 @@ type Client struct {
 	bootstrap []string
 	nodes     map[string]*NodeMeta
 	connected bool
+	debugMode bool
 }
 
 func NewClient(options ...Option) (*Client, error) {
@@ -174,7 +175,7 @@ func (c *Client) updateNodeInfo(addr string) {
 	info, err := c.nodeInfo(addr)
 	healthy := err == nil
 
-	if err != nil {
+	if err != nil && c.debugMode {
 		fmt.Println("failed to get node info:", err)
 	}
 
