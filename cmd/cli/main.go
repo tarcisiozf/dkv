@@ -50,6 +50,9 @@ func main() {
 		case "delete":
 			deleteCmd(client, args)
 			break
+		case "slot":
+			slotCmd(client, args)
+			break
 		case "help":
 			printUsage()
 			break
@@ -67,6 +70,21 @@ func main() {
 	if err := scanner.Err(); err != nil {
 		panic(fmt.Errorf("error reading input: %v", err))
 	}
+}
+
+func slotCmd(client *dkv.Client, args []string) {
+	if len(args) != 1 {
+		fmt.Println("Usage: slot <ley>")
+		return
+	}
+
+	slotID := client.SlotID(args[0])
+	if slotID < 0 {
+		fmt.Println("Error: Invalid key or slot ID not found")
+		return
+	}
+
+	fmt.Printf("Slot ID for key '%s': %d\n", args[0], slotID)
 }
 
 func printInfo(client *dkv.Client) {
@@ -141,6 +159,7 @@ func printUsage() {
 	fmt.Println("  get <key>: Get the value for the specified key")
 	fmt.Println("  set <key> <value>: Set the value for the specified key")
 	fmt.Println("  delete <key>: Delete the specified key")
+	fmt.Println("  slot <key>: Show the slot ID for the specified key")
 	fmt.Println("  info: Show information about the client")
 	fmt.Println("  help: Show this help message")
 	fmt.Println("  exit or quit: Exit the program")

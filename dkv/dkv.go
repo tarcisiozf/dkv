@@ -129,7 +129,7 @@ func (c *Client) Get(key string) (string, bool, error) {
 		return "", false, fmt.Errorf("client not connected")
 	}
 
-	slotID := slots.GetSlotId([]byte(key))
+	slotID := c.SlotID(key)
 	node := first(c.nodesForSlot(slotID))
 	if node == nil {
 		return "", false, fmt.Errorf("no healthy nodes available")
@@ -318,7 +318,7 @@ func (c *Client) nodesForSlot(slotID uint16) iter.Seq[*NodeMeta] {
 }
 
 func (c *Client) pickWriterForKey(key string) *NodeMeta {
-	slotID := slots.GetSlotId([]byte(key))
+	slotID := c.SlotID(key)
 
 	for node := range c.nodesForSlot(slotID) {
 		if node.Info.Role == "writer" {
@@ -326,4 +326,8 @@ func (c *Client) pickWriterForKey(key string) *NodeMeta {
 		}
 	}
 	return nil
+}
+
+func (c *Client) SlotID(key string) uint16 {
+	return slots.GetSlotId([]byte(key))
 }
