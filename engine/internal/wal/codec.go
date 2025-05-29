@@ -32,21 +32,23 @@ func EncodeEntry(op Operation, key []byte, data []byte) ([]byte, error) {
 	return it.Data(), nil
 }
 
-func DecodeEntry(entry []byte) (Operation, []byte, []byte, error) {
+func DecodeEntry(entry []byte) (op Operation, key []byte, data []byte, err error) {
 	it := NewBinaryIteratorFrom(entry)
-	op := it.Byte()
+	op = it.Byte()
 	lenKey := it.Byte()
 	if lenKey == 0 {
 		return 0, nil, nil, fmt.Errorf("invalid empty key in WAL entry")
 	}
-	key := it.Bytes(int(lenKey))
-	lenData := it.Uint16()
-	if lenData == 0 {
-		return 0, nil, nil, fmt.Errorf("invalid empty data in WAL entry")
-	}
-	data := it.Bytes(int(lenData))
-	if len(data) != int(lenData) {
-		return 0, nil, nil, fmt.Errorf("invalid data length in WAL entry: %d/%d", len(data), lenData)
+	key = it.Bytes(int(lenKey))
+	if op == OpSet {
+		lenData := it.Uint16()
+		if lenData == 0 {
+			return 0, nil, nil, fmt.Errorf("invalid empty data in WAL entry")
+		}
+		data = it.Bytes(int(lenData))
+		if len(data) != int(lenData) {
+			return 0, nil, nil, fmt.Errorf("invalid data length in WAL entry: %d/%d", len(data), lenData)
+		}
 	}
 	return op, key, data, nil
 }
