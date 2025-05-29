@@ -67,8 +67,8 @@ func (te *Environment) CreateInstance(ctx context.Context, options ...engine.Con
 	}
 	defaultOptions := []engine.ConfigOption{
 		engine.WithZookeeper(te.zkAddr),
-		engine.WithRpcPort(strconv.Itoa(te.nextPort())),
 		engine.WithHttpPort(strconv.Itoa(te.nextPort())),
+		engine.WithRpcPort(strconv.Itoa(te.nextPort())),
 		engine.WithNodeID(nodeId.String()),
 		engine.WithDirPath(testDbPath + "/" + nodeId.String()),
 		engine.WithZNodeBasePath(te.zBasePath),
