@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/tarcisiozf/dkv/engine"
 	"github.com/tarcisiozf/dkv/engine/nodes"
 	"github.com/tarcisiozf/dkv/slots"
@@ -49,7 +50,7 @@ func (r *Router) HandleGetKey(w http.ResponseWriter, rq *http.Request) {
 
 	if err != nil {
 		log.Printf("[ERROR] Error getting value for key %s: %v", key, err)
-		http.Error(w, "Error getting value", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error getting value: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (r *Router) HandleSetKeyValue(w http.ResponseWriter, rq *http.Request) {
 	err = r.db.Set(key, value)
 	if err != nil {
 		log.Printf("[ERROR] Error setting value for key %s: %v", key, err)
-		http.Error(w, "Error setting value", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error setting value: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -101,7 +102,7 @@ func (r *Router) HandleDeleteKey(w http.ResponseWriter, rq *http.Request) {
 
 	if err != nil {
 		log.Printf("[ERROR] Error deleting key %s: %v", key, err)
-		http.Error(w, "Error deleting key", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error deleting key: %v", err), http.StatusInternalServerError)
 		return
 	}
 

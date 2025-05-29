@@ -266,6 +266,10 @@ func (db *DbEngine) Set(key, value []byte) error {
 		return fmt.Errorf("node is not ready")
 	}
 
+	if !db.Node().Role.IsWriter() {
+		return fmt.Errorf("write operation not allowed on non-writer node")
+	}
+
 	slotKey, err := db.getSlotKey(key)
 	if err != nil {
 		return fmt.Errorf("failed to get slot key: %w", err)
@@ -288,6 +292,10 @@ func (db *DbEngine) Set(key, value []byte) error {
 func (db *DbEngine) Delete(key []byte) error {
 	if !db.Node().Status.IsReady() {
 		return fmt.Errorf("node is not ready")
+	}
+
+	if !db.Node().Role.IsWriter() {
+		return fmt.Errorf("write operation not allowed on non-writer node")
 	}
 
 	slotKey, err := db.getSlotKey(key)
