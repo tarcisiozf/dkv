@@ -47,6 +47,9 @@ func main() {
 		case "set":
 			setCmd(client, args)
 			break
+		case "delete":
+			deleteCmd(client, args)
+			break
 		case "help":
 			printUsage()
 			break
@@ -88,6 +91,11 @@ func printInfo(client *dkv.Client) {
 }
 
 func getCmd(client *dkv.Client, args []string) {
+	if len(args) != 1 {
+		fmt.Println("Usage: get <key>")
+		return
+	}
+
 	value, exists, err := client.Get(args[0])
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -101,6 +109,11 @@ func getCmd(client *dkv.Client, args []string) {
 }
 
 func setCmd(client *dkv.Client, args []string) {
+	if len(args) != 2 {
+		fmt.Println("Usage: set <key> <value>")
+		return
+	}
+
 	err := client.Set(args[0], args[1])
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -109,10 +122,25 @@ func setCmd(client *dkv.Client, args []string) {
 	fmt.Println("Value set successfully")
 }
 
+func deleteCmd(client *dkv.Client, args []string) {
+	if len(args) != 1 {
+		fmt.Println("Usage: delete <key>")
+		return
+	}
+
+	err := client.Delete(args[0])
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Key deleted successfully")
+}
+
 func printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  get <key>: Get the value for the specified key")
 	fmt.Println("  set <key> <value>: Set the value for the specified key")
+	fmt.Println("  delete <key>: Delete the specified key")
 	fmt.Println("  info: Show information about the client")
 	fmt.Println("  help: Show this help message")
 	fmt.Println("  exit or quit: Exit the program")

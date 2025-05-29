@@ -232,7 +232,7 @@ func TestDbEngine_FaultTolerance(t *testing.T) {
 			t.Fatalf("Expected writer not to be nil")
 		}
 
-		for i := 0; i < 1; i++ {
+		for i := 0; i < 100; i++ {
 			key := testEnv.FakeKey()
 			value := testEnv.FakeValue()
 			err := writer.Set(key, value)

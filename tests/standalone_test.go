@@ -27,32 +27,38 @@ func TestDbEngine_Standalone(t *testing.T) {
 	key := []byte("test_key")
 	value := []byte("test_value")
 
-	if err := instance.Set(key, value); err != nil {
-		t.Fatalf("Error setting value: %v", err)
-	}
+	t.Run("set key-value pair", func(t *testing.T) {
+		if err := instance.Set(key, value); err != nil {
+			t.Fatalf("Error setting value: %v", err)
+		}
+	})
 
-	result, err := instance.Get(key)
-	if err != nil {
-		t.Fatalf("Error getting value: %v", err)
-	}
+	t.Run("get key-value pair", func(t *testing.T) {
+		result, err := instance.Get(key)
+		if err != nil {
+			t.Fatalf("Error getting value: %v", err)
+		}
 
-	if string(result) != string(value) {
-		t.Fatalf("Expected value %s, got %s", value, result)
-	}
+		if string(result) != string(value) {
+			t.Fatalf("Expected value %s, got %s", value, result)
+		}
+	})
 
-	err = instance.Delete(key)
-	if err != nil {
-		t.Fatalf("Error deleting value: %v", err)
-	}
+	t.Run("delete key-value pair", func(t *testing.T) {
+		err := instance.Delete(key)
+		if err != nil {
+			t.Fatalf("Error deleting value: %v", err)
+		}
 
-	result, err = instance.Get(key)
-	if err == nil {
-		t.Fatalf("Expected error getting deleted key, got value: %s", result)
-	}
-	if !errors.Is(err, engine.ErrKeyNotFound) {
-		t.Fatalf("Expected key not found error, got: %v", err)
-	}
-	if result != nil {
-		t.Fatalf("Expected nil result for deleted key, got: %s", result)
-	}
+		result, err := instance.Get(key)
+		if err == nil {
+			t.Fatalf("Expected error getting deleted key, got value: %s", result)
+		}
+		if !errors.Is(err, engine.ErrKeyNotFound) {
+			t.Fatalf("Expected key not found error, got: %v", err)
+		}
+		if result != nil {
+			t.Fatalf("Expected nil result for deleted key, got: %s", result)
+		}
+	})
 }

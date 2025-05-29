@@ -64,16 +64,18 @@ func (n NodeInfo) String() string {
 }
 
 type Client struct {
-	bootstrap []string
-	nodes     map[string]*NodeMeta
-	connected bool
-	debugMode bool
+	bootstrap  []string
+	nodes      map[string]*NodeMeta
+	httpClient *http.Client
+	connected  bool
+	debugMode  bool
 }
 
 func NewClient(options ...Option) (*Client, error) {
 	client := &Client{
-		bootstrap: []string{},
-		nodes:     make(map[string]*NodeMeta),
+		bootstrap:  []string{},
+		nodes:      make(map[string]*NodeMeta),
+		httpClient: &http.Client{},
 	}
 	for _, opt := range options {
 		if err := opt(client); err != nil {
@@ -127,7 +129,8 @@ func (c *Client) Get(key string) (string, bool, error) {
 		return "", false, fmt.Errorf("client not connected")
 	}
 
-	node := c.pickHealthyNode()
+	slotID := slots.GetSlotId([]byte(key))
+	node := first(c.nodesForSlot(slotID))
 	if node == nil {
 		return "", false, fmt.Errorf("no healthy nodes available")
 	}
@@ -149,6 +152,33 @@ func (c *Client) Get(key string) (string, bool, error) {
 		return "", false, fmt.Errorf("failed to read response body: %w", err)
 	}
 	return string(value), true, nil
+}
+
+func (c *Client) Delete(key string) error {
+	if !c.connected {
+		return fmt.Errorf("client not connected")
+	}
+
+	node := c.pickWriterForKey(key)
+	if node == nil {
+		return fmt.Errorf("no healthy nodes available")
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, "http://"+node.HttpAddress()+"/"+key, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create delete request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to delete key: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to delete key, status code: %d", resp.StatusCode)
+	}
+	return nil
 }
 
 func (c *Client) Close() {
