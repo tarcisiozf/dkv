@@ -5,11 +5,19 @@ import (
 	"fmt"
 	"github.com/tarcisiozf/dkv/slots"
 	"io"
+	"iter"
 	"math/rand"
 	"net/http"
 	"strings"
 	"time"
 )
+
+func first[T any](it iter.Seq[T]) (elem T) {
+	for elem = range it {
+		break
+	}
+	return elem
+}
 
 const retryInterval = 30 * time.Second
 
@@ -96,7 +104,7 @@ func (c *Client) Set(key, value string) error {
 		return fmt.Errorf("client not connected")
 	}
 
-	node := c.pickHealthyNode()
+	node := c.pickWriterForKey(key)
 	if node == nil {
 		return fmt.Errorf("no healthy nodes available")
 	}
@@ -157,9 +165,7 @@ func (c *Client) watchNodes() {
 			return
 		}
 
-		it := c.nodeIterator()
-
-		for node := it(); node != nil; node = it() {
+		for node := range c.nodeIterator() {
 			if !node.Healthy && node.RetryIn.After(time.Now()) {
 				continue
 			}
@@ -215,7 +221,7 @@ func (c *Client) nodeInfo(node string) (info NodeInfo, err error) {
 	return info, nil
 }
 
-func (c *Client) nodeIterator() func() *NodeMeta {
+func (c *Client) nodeIterator() iter.Seq[*NodeMeta] {
 	numNodes := len(c.nodes)
 	addrs := make([]string, 0, numNodes)
 	for addr := range c.nodes {
@@ -223,26 +229,29 @@ func (c *Client) nodeIterator() func() *NodeMeta {
 	}
 
 	start := rand.Intn(numNodes)
-	i := 0
 
-	return func() *NodeMeta {
-		if i >= numNodes {
-			return nil
+	return func(yield func(*NodeMeta) bool) {
+		for i := 0; i < numNodes; i++ {
+			addr := addrs[(start+i)%numNodes]
+			if !yield(c.nodes[addr]) {
+				break
+			}
 		}
-		addr := addrs[(start+i)%numNodes]
-		i++
-		return c.nodes[addr]
 	}
 }
 
 func (c *Client) pickHealthyNode() *NodeMeta {
-	it := c.nodeIterator()
-	for node := it(); node != nil; node = it() {
-		if node.Healthy {
-			return node
+	return first(c.healthyNodes())
+}
+
+func (c *Client) healthyNodes() iter.Seq[*NodeMeta] {
+	return func(yield func(*NodeMeta) bool) {
+		for _, node := range c.nodes {
+			if node.Healthy && !yield(node) {
+				break
+			}
 		}
 	}
-	return nil
 }
 
 func (c *Client) Nodes() []NodeMeta {
@@ -264,4 +273,27 @@ func (c *Client) getNodeByAddrOrID(addr, id string) *NodeMeta {
 	node := &NodeMeta{}
 	c.nodes[addr] = node
 	return node
+}
+
+func (c *Client) nodesForSlot(slotID uint16) iter.Seq[*NodeMeta] {
+	return func(yield func(*NodeMeta) bool) {
+		for node := range c.healthyNodes() {
+			if node.Info.SlotRange.Contains(slotID) {
+				if !yield(node) {
+					break
+				}
+			}
+		}
+	}
+}
+
+func (c *Client) pickWriterForKey(key string) *NodeMeta {
+	slotID := slots.GetSlotId([]byte(key))
+
+	for node := range c.nodesForSlot(slotID) {
+		if node.Info.Role == "writer" {
+			return node
+		}
+	}
+	return nil
 }
