@@ -61,6 +61,9 @@ func main() {
 			break
 		case "exit", "quit":
 			return
+		case "kill":
+			killCmd(client, args)
+			break
 		default:
 			fmt.Println("Unknown command:", cmd)
 			fmt.Println("Type 'help' for a list of commands.")
@@ -154,6 +157,20 @@ func deleteCmd(client *dkv.Client, args []string) {
 	fmt.Println("Key deleted successfully")
 }
 
+func killCmd(client *dkv.Client, args []string) {
+	if len(args) != 1 {
+		fmt.Println("Usage: kill <node ID>")
+		return
+	}
+
+	err := client.Shutdown(args[0])
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Node killed successfully")
+}
+
 func printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  get <key>: Get the value for the specified key")
@@ -163,4 +180,5 @@ func printUsage() {
 	fmt.Println("  info: Show information about the client")
 	fmt.Println("  help: Show this help message")
 	fmt.Println("  exit or quit: Exit the program")
+	fmt.Println("  kill <node ID>: Kill the specified node")
 }

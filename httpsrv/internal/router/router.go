@@ -146,3 +146,17 @@ func (r *Router) HandleInfo(w http.ResponseWriter, rq *http.Request) {
 		return
 	}
 }
+
+func (r *Router) HandleShutdown(w http.ResponseWriter, rq *http.Request) {
+	defer rq.Body.Close()
+
+	err := r.db.Close()
+	if err != nil {
+		log.Printf("[ERROR] Error shutting down the server: %v", err)
+		http.Error(w, fmt.Sprintf("Error shutting down: %v", err), http.StatusInternalServerError)
+		return
+	}
+	log.Println("[INFO] Server shutdown successfully")
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprintln(w, "Server shutting down...")
+}

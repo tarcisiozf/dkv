@@ -2,6 +2,7 @@ package dkv
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/tarcisiozf/dkv/slots"
 	"io"
@@ -330,4 +331,22 @@ func (c *Client) pickWriterForKey(key string) *NodeMeta {
 
 func (c *Client) SlotID(key string) uint16 {
 	return slots.GetSlotId([]byte(key))
+}
+
+func (c *Client) Shutdown(nodeID string) error {
+	for _, node := range c.Nodes() {
+		if node.Info.ID == nodeID {
+			url := "http://" + node.HttpAddress() + "/shutdown"
+			resp, err := http.Post(url, "application/json", nil)
+			if err != nil {
+				return err
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				return errors.New("shutdown failed: " + resp.Status)
+			}
+			return nil
+		}
+	}
+	return errors.New("node ID not found")
 }

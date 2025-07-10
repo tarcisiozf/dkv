@@ -26,6 +26,7 @@ func (s *HttpServer) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{key}", r.HandleGetKey)
 	mux.HandleFunc("POST /{key}", r.HandleSetKeyValue)
 	mux.HandleFunc("DELETE /{key}", r.HandleDeleteKey)
+	mux.HandleFunc("POST /shutdown", r.HandleShutdown)
 }
 
 func NewHttpServer(db *engine.DbEngine, port string) *HttpServer {
