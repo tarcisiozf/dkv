@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	numWriters := 1
-	numReadReplicas := 1
-	numInstances := numWriters + numReadReplicas
+	numWriters := 2
+	numReadReplicas := 2
+	numInstances := numWriters + (numWriters * numReadReplicas)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	env := test.NewTestEnv(
@@ -23,8 +23,8 @@ func main() {
 	defer env.Destroy(ctx)
 
 	options := []engine.ConfigOption{
-		engine.WithReplicationFactor(numInstances),
-		engine.WithWriteQuorum(numWriters + 1),
+		engine.WithReplicationFactor(numReadReplicas + 1),
+		engine.WithWriteQuorum(1),
 		engine.WithMode("cluster"),
 	}
 
