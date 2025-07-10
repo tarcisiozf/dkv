@@ -33,7 +33,7 @@ func main() {
 			break
 		}
 		input := scanner.Text()
-		parts := strings.Split(input, " ")
+		parts := strings.Split(strings.TrimSpace(input), " ")
 		cmd, args := parts[0], parts[1:]
 		cmd = strings.TrimSpace(strings.ToLower(cmd))
 		if len(cmd) == 0 {
