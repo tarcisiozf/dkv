@@ -12,6 +12,8 @@ import (
 )
 
 func TestDbEngine_Replication(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	testEnv := test.NewTestEnv(
@@ -86,6 +88,8 @@ func TestDbEngine_Replication(t *testing.T) {
 }
 
 func TestDbEngine_NewReadReplica(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	testEnv := test.NewTestEnv(
@@ -195,6 +199,8 @@ func TestDbEngine_NewReadReplica(t *testing.T) {
 }
 
 func TestDbEngine_FaultTolerance(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	testEnv := test.NewTestEnv(

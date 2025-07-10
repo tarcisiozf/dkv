@@ -9,6 +9,8 @@ import (
 )
 
 func TestDbEngine_Standalone(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	testEnv := test.NewTestEnv()

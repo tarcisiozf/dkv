@@ -138,18 +138,14 @@ func (te *Environment) Destroy(ctx context.Context) error {
 			} else {
 				log.Printf("TEST ENV - Instance %s shut down successfully", n.NodeID())
 			}
+
+			te.removeDbDir(n.DirPath())
 		}(instance)
 	}
 	wg.Wait()
 
 	te.cleanupZookeeper()
-
-	// remove test database directory
-	log.Printf("TEST ENV - Removing test database directory...")
-	if _, err := os.Stat(testDbPath); os.IsNotExist(err) {
-		return nil
-	}
-	return os.RemoveAll(testDbPath)
+	return nil
 }
 
 func (te *Environment) cleanupZookeeper() {
@@ -164,7 +160,7 @@ func (te *Environment) cleanupZookeeper() {
 	}
 	defer conn.Close()
 
-	te.deleteZookeeperPath(conn, testZkPath)
+	te.deleteZookeeperPath(conn, te.zBasePath)
 
 	log.Printf("TEST ENV - Zookeeper base path %s cleaned up", te.zBasePath)
 }
@@ -431,6 +427,19 @@ func (te *Environment) EnsureClusterSetup(numWriters, replicationFactor, writeQu
 
 func (te *Environment) Instances() []*engine.DbEngine {
 	return te.instances
+}
+
+func (te *Environment) removeDbDir(dirPath string) {
+	log.Printf("TEST ENV - Removing test database directory...")
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		log.Printf("TEST ENV - Directory %s does not exist, skipping removal", dirPath)
+		return
+	}
+	if err := os.RemoveAll(dirPath); err != nil {
+		log.Printf("TEST ENV - Error removing directory %s: %v", dirPath, err)
+	} else {
+		log.Printf("TEST ENV - Directory %s removed successfully", dirPath)
+	}
 }
 
 func NewInMemoryFileSystem() *filesys.InMemoryFileSystem {

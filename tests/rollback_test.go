@@ -9,6 +9,8 @@ import (
 )
 
 func TestDbEngine_Rollback_Prepare(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	fs := test.NewInMemoryFileSystem()
@@ -73,6 +75,8 @@ func TestDbEngine_Rollback_Prepare(t *testing.T) {
 }
 
 func TestDbEngine_Rollback_Commit(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	fs := test.NewInMemoryFileSystem()

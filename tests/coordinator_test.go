@@ -14,6 +14,8 @@ import (
 )
 
 func TestDbEngine_Coordinator_MultiWriters(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	testEnv := test.NewTestEnv(

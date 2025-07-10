@@ -10,6 +10,8 @@ import (
 )
 
 func TestDbEngine_Cluster_NewWriterWithReplicas(t *testing.T) {
+	t.Parallel()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	testEnv := test.NewTestEnv(
